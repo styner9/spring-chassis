@@ -25,7 +25,7 @@ gradle-app.setting
 # copy from https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
 
 # whole .idea directory
-.idea/
+.idea
 
 # File-based project format
 *.iws
