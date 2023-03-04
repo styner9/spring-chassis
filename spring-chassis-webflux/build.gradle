@@ -1,0 +1,9 @@
+apply from: "${rootDir}/build-chassis/gradle/recipe/java-library.gradle"
+apply from: "${rootDir}/build-chassis/gradle/recipe/test.gradle"
+
+dependencies {
+    api project(":spring-chassis-web")
+    api "org.springframework.boot:spring-boot-starter-webflux"
+
+    testImplementation project(":spring-chassis-test")
+}

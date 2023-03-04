@@ -1,0 +1,3 @@
+org.springframework.context.ApplicationContextInitializer=\
+dev.springchassis.core.context.SpringChassisContextHolder,\
+dev.springchassis.core.context.EagerLoadableLoader

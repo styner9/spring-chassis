@@ -1,0 +1,8 @@
+apply from: "${rootDir}/build-chassis/gradle/recipe/spring.gradle"
+apply from: "${rootDir}/build-chassis/gradle/recipe/test.gradle"
+
+dependencies {
+    implementation project(":spring-chassis-webmvc")
+
+    testImplementation project(":spring-chassis-test")
+}

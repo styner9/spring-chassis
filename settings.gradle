@@ -1,0 +1,9 @@
+rootProject.name = 'spring-chassis'
+
+include 'spring-chassis-bom'
+include 'spring-chassis-core'
+include 'spring-chassis-test'
+include 'spring-chassis-web'
+include 'spring-chassis-webflux'
+include 'spring-chassis-webmvc'
+include 'spring-chassis-webmvc-demo'

@@ -1,0 +1,10 @@
+apply from: "${rootDir}/build-chassis/gradle/recipe/java-library.gradle"
+apply from: "${rootDir}/build-chassis/gradle/recipe/test.gradle"
+
+dependencies {
+    api project(":spring-chassis-core")
+    api "org.springframework:spring-web"
+    api "org.hibernate.validator:hibernate-validator"
+
+    testImplementation project(":spring-chassis-test")
+}

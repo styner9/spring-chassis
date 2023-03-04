@@ -1,0 +1,10 @@
+testControl.category.enabled = false
+
+apply from: "${rootDir}/build-chassis/gradle/recipe/java-library.gradle"
+apply from: "${rootDir}/build-chassis/gradle/recipe/test.gradle"
+
+dependencies {
+    api project(":spring-chassis-core")
+    api 'org.springframework.boot:spring-boot-starter-test'
+    api "com.carrotsearch:junit-benchmarks:${localVersions.junitBenchmark}"
+}

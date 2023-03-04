@@ -1,0 +1,22 @@
+buildscript {
+    apply from: "${rootDir}/build-chassis/gradle/recipe/properties.gradle"
+    apply from: "${rootDir}/build-chassis/gradle/recipe/buildscript.gradle"
+}
+
+apply from: "${rootDir}/build-chassis/gradle/recipe/default.gradle"
+
+configure(subprojects.findAll { it.name != "spring-chassis-bom" }) {
+    apply from: "${rootDir}/build-chassis/gradle/recipe/dependencies.gradle", to: subprojects
+    apply from: "${rootDir}/build-chassis/gradle/recipe/java.gradle", to: subprojects
+
+    dependencies {
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    }
+}
+
+ext {
+    localVersions = [
+            classgraph: "4.8.139",
+            junitBenchmark: "0.7.2"
+    ]
+}

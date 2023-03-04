@@ -1,0 +1,28 @@
+testControl.category.enabled = false
+
+apply from: "${rootDir}/build-chassis/gradle/recipe/java-library.gradle"
+apply from: "${rootDir}/build-chassis/gradle/recipe/test.gradle"
+
+dependencies {
+    // spring
+    api "org.springframework.boot:spring-boot-starter"
+
+    // jackson
+    api "com.fasterxml.jackson.core:jackson-databind"
+    api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+    api "com.fasterxml.jackson.datatype:jackson-datatype-guava"
+
+    // logging
+    api "org.slf4j:slf4j-api"
+
+    // metrics
+    api "org.springframework.boot:spring-boot-starter-actuator"
+    api "io.micrometer:micrometer-core"
+
+    // utility
+    api "org.apache.commons:commons-lang3"
+    api "org.apache.commons:commons-collections4"
+    api "com.google.guava:guava"
+    api "io.github.classgraph:classgraph:${localVersions.classgraph}"
+}
