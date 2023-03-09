@@ -1,0 +1,8 @@
+springchassis:
+  core:
+    base-packages: com.mycompany
+
+
+logging:
+  level:
+    dev.springchassis: trace

@@ -73,7 +73,7 @@ abstract class CodedRegistry<T extends Coded> {
         ) {
             var classLoader = CodedRegistry.class.getClassLoader();
 
-            var classes = ClassUtil.allImplementations(interfaceClass, classLoader)
+            var classes = ClassUtil.allImplementations(interfaceClass, SpringChassisContextHolder.getBasePackages())
                     .stream()
                     .filter(ClassInfo::isEnum)
                     .map(info -> {

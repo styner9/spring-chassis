@@ -1,7 +1,7 @@
 package dev.springchassis.webmvc.interceptor;
 
-import dev.springchassis.web.method.HandlerMethodCache;
-import dev.springchassis.web.method.HandlerMethodScanner;
+import dev.springchassis.core.util.BeanUtil;
+import dev.springchassis.web.method.HandlerMethodCache.AnnotatedHandlerMethodCache;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.GenericTypeResolver;
@@ -12,108 +12,84 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
+import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
+@SuppressWarnings("unchecked")
 public abstract class AnnotationBasedHandlerInterceptor<T extends Annotation>
         extends ConfigurableHandlerInterceptor
         implements ApplicationListener<ContextRefreshedEvent> {
 
     private final Class<T> annotationType;
 
-    private HandlerMethodCache.AnnotatedHandlerMethodCache<T> cache;
+    private final String requestAttrName;
 
-    @SuppressWarnings("unchecked")
+    private AnnotatedHandlerMethodCache<T> handlerMethodCache;
+
     protected AnnotationBasedHandlerInterceptor() {
         annotationType = Optional.ofNullable(GenericTypeResolver.resolveTypeArgument(getClass(), AnnotationBasedHandlerInterceptor.class))
                 .map(type -> (Class<T>) type)
                 .orElseThrow(IllegalStateException::new);
+        requestAttrName = annotationType.getName() + ".RESOLVED";
     }
 
     @Override
     public final void onApplicationEvent(ContextRefreshedEvent event) {
-        var handlerMethods = HandlerMethodScanner.scan(
-                event.getApplicationContext(),
-                RequestMappingHandlerMapping.class,
-                mapping -> mapping.getHandlerMethods().values()
-        );
-        cache = new HandlerMethodCache.AnnotatedHandlerMethodCache<>(handlerMethods, annotationType);
-        doWithHandlerMethods(handlerMethods);
-    }
-
-    protected void doWithHandlerMethods(Set<HandlerMethod> handlerMethods) {
-        // do nothing
+        var handlerMapping = BeanUtil.exactTypeOf(event.getApplicationContext(), RequestMappingHandlerMapping.class);
+        var handlerMethods = new HashSet<>(handlerMapping.getHandlerMethods().values());
+        this.handlerMethodCache = new AnnotatedHandlerMethodCache<>(handlerMethods, annotationType);
     }
 
     @Override
     public final boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (isTargetHandler(handler)) {
-            T annotation = getAnnotation(handler);
-            if (isTargetAnnotation(annotation)) {
+        if (handler instanceof HandlerMethod) {
+            T annotation = handlerMethodCache.get((HandlerMethod) handler);
+            if (annotation != null) {
+                request.setAttribute(requestAttrName, annotation);
                 return doPreHandle(request, response, handler, annotation);
             }
         }
         return true;
     }
 
-    protected boolean doPreHandle(HttpServletRequest request, HttpServletResponse response, Object handler, T annotation) throws Exception {
-        return true;
-    }
-
     @Override
     public final void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        if (isTargetHandler(handler)) {
-            T annotation = getAnnotation(handler);
-            if (isTargetAnnotation(annotation)) {
-                doPostHandle(request, response, handler, modelAndView, annotation);
-            }
+        T annotation = (T) request.getAttribute(requestAttrName);
+        if (annotation != null) {
+            doPostHandle(request, response, handler, modelAndView, annotation);
         }
-    }
-
-    private boolean isTargetHandler(Object handler) {
-        return handler instanceof HandlerMethod;
-    }
-
-    protected boolean isTargetAnnotation(T annotation) {
-        return annotationType.isInstance(annotation);
-    }
-
-    protected final T getAnnotation(Object handler) {
-        if (cache == null) {
-            throw new IllegalStateException();
-        }
-        return cache.get((HandlerMethod) handler);
-    }
-
-    protected void doPostHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView, T annotation) throws Exception {
-        // do nothing
     }
 
     @Override
     public final void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        if (isTargetHandler(handler)) {
-            T annotation = getAnnotation(handler);
-            if (isTargetAnnotation(annotation)) {
-                doAfterCompletion(request, response, handler, ex, annotation);
-            }
+        T annotation = (T) request.getAttribute(requestAttrName);
+        if (annotation != null) {
+            doAfterCompletion(request, response, handler, ex, annotation);
         }
-    }
-
-    protected void doAfterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex, T annotation) throws Exception {
-        // do nothing
     }
 
     @Override
     public final void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (isTargetHandler(handler)) {
-            T annotation = getAnnotation(handler);
-            if (isTargetAnnotation(annotation)) {
-                doAfterConcurrentHandlingStarted(request, response, handler, annotation);
-            }
+        T annotation = (T) request.getAttribute(requestAttrName);
+        if (annotation != null) {
+            doAfterConcurrentHandlingStarted(request, response, handler, annotation);
         }
     }
 
+    protected boolean doPreHandle(HttpServletRequest request, HttpServletResponse response, Object handler, T annotation) throws Exception {
+        // override this
+        return true;
+    }
+
+    protected void doPostHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView, T annotation) throws Exception {
+        // override this
+    }
+
+    protected void doAfterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex, T annotation) throws Exception {
+        // override this
+    }
+
     protected void doAfterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler, T annotation) throws Exception {
-        // do nothing
+        // override this
     }
 }

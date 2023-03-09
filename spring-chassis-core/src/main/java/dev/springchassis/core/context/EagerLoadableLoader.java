@@ -26,7 +26,7 @@ public class EagerLoadableLoader implements ApplicationContextInitializer<Config
 //        }
 
         var classLoader = EagerLoadableLoader.class.getClassLoader();
-        var targetClassNames = ClassUtil.allImplementations(EagerLoadable.class, classLoader)
+        var targetClassNames = ClassUtil.allImplementations(EagerLoadable.class, SpringChassisContextHolder.getBasePackages())
                 .stream()
                 .map(ClassInfo::getName)
                 .collect(Collectors.toList());

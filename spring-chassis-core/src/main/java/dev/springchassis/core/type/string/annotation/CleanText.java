@@ -2,9 +2,9 @@ package dev.springchassis.core.type.string.annotation;
 
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import dev.springchassis.core.type.string.CleanTextStringDeserializer;
 import dev.springchassis.core.type.string.StringCaseEnforcer;
 import dev.springchassis.core.type.string.StringTrimmer;
-import dev.springchassis.core.type.string.CleanTextStringDeserializer;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
