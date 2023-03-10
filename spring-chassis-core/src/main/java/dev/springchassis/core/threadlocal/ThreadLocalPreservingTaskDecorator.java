@@ -1,25 +1,26 @@
 package dev.springchassis.core.threadlocal;
 
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.task.TaskDecorator;
 
-public class ThreadLocalPreservingTaskDecorator implements TaskDecorator {
+@RequiredArgsConstructor
+public class ThreadLocalPreservingTaskDecorator implements TaskDecorator, ThreadLocalPreservingDecorator<Runnable> {
 
-    private final ThreadLocalAccessorRegistry registry;
-
-    public ThreadLocalPreservingTaskDecorator(@NonNull ThreadLocalAccessorRegistry registry) {
-        this.registry = registry;
-    }
+    @NonNull
+    @Getter
+    private final ThreadLocalContext threadLocalContext;
 
     @Override
     public final Runnable decorate(Runnable runnable) {
-        var contexts = registry.getContexts();
+        var contexts = threadLocalContext.get();
         return () -> {
             try {
-                registry.setContexts(contexts);
+                threadLocalContext.set(contexts);
                 runnable.run();
             } finally {
-                registry.clearContexts();
+                threadLocalContext.clear();
             }
         };
     }

@@ -3,6 +3,7 @@ package dev.springchassis.core.threadlocal;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
@@ -11,7 +12,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class ThreadLocalAccessorRegistry {
+@Slf4j
+public class ThreadLocalContext {
 
     private static final ThreadLocalAccessor<MdcWrapper> MDC_ACCESSOR = new ThreadLocalAccessor<>(
             MdcWrapper.class,
@@ -25,11 +27,11 @@ public class ThreadLocalAccessorRegistry {
     private final List<ThreadLocalAccessor<?>> accessorList;
     private final Map<Class<?>, ThreadLocalAccessor<?>> accessorMap;
 
-    public ThreadLocalAccessorRegistry() {
+    public ThreadLocalContext() {
         this(null);
     }
 
-    public ThreadLocalAccessorRegistry(List<ThreadLocalAccessor<?>> additionalAccessors) {
+    public ThreadLocalContext(List<ThreadLocalAccessor<?>> additionalAccessors) {
         var accessors = Lists.newArrayList(DEFAULT_ACCESSORS);
         if (CollectionUtils.isNotEmpty(additionalAccessors)) {
             accessors.addAll(additionalAccessors);
@@ -42,7 +44,7 @@ public class ThreadLocalAccessorRegistry {
         );
     }
 
-    public Map<Class<?>, Object> getContexts() {
+    public Map<Class<?>, Object> get() {
         // https://bugs.openjdk.java.net/browse/JDK-8148463
         Map<Class<?>, Object> map = Maps.newHashMap();
         accessorMap.forEach((type, accessor) -> {
@@ -55,11 +57,12 @@ public class ThreadLocalAccessorRegistry {
         return map;
     }
 
-    public void setContexts(@NonNull Map<Class<?>, Object> map) {
+    public void set(@NonNull Map<Class<?>, Object> map) {
+        log.info("set context");
         accessorMap.forEach((type, accessor) -> accessor.set(map.get(type)));
     }
 
-    public void clearContexts() {
+    public void clear() {
         accessorList.forEach(ThreadLocalAccessor::clear);
     }
 }
